@@ -1,4 +1,4 @@
-# ProTel
+# zerotouch_voicerecognition (ProTel)
 
 **ProTel** is an advanced Indonesian speech processing pipeline designed for real-time and batch interactions. It integrates state-of-the-art offline machine learning models for Speech-to-Text (STT), Wake Word detection, and Text-to-Speech (TTS), entirely locally on your machine.
 
