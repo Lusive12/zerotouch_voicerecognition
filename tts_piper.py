@@ -1,0 +1,52 @@
+import os
+import subprocess
+
+def synthesize_indonesian(text: str, output_path: str, length_scale: float = 1.0, noise_scale: float = 0.667, noise_w: float = 0.8):
+    """
+    Synthesize Indonesian text to speech using Piper CLI.
+    """
+    # Paths to the model and Piper executable
+    base_dir = os.path.dirname(__file__)
+    model_path = os.path.join(base_dir, "models", "id_ID-news_tts-medium.onnx")
+    piper_exe = os.path.join(base_dir, "venv", "Scripts", "piper.exe")
+
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found at: {model_path}")
+    
+    if not os.path.exists(piper_exe):
+        raise FileNotFoundError(f"Piper executable not found at: {piper_exe}")
+
+    print(f"Synthesizing: \"{text}\"")
+
+    # Run piper via subprocess with advanced parameters for better naturalness
+    # We pipe the text to standard input of the piper executable
+    try:
+        process = subprocess.run(
+            [
+                piper_exe, 
+                "--model", model_path, 
+                "--output_file", output_path,
+                "--length_scale", str(length_scale),
+                "--noise_scale", str(noise_scale),
+                "--noise_w", str(noise_w)
+            ],
+            input=text.encode("utf-8"),
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        print(f"✅ Audio successfully saved to: {output_path}")
+    except subprocess.CalledProcessError as e:
+        print("❌ Error during synthesis!")
+        print(e.stderr.decode("utf-8"))
+
+if __name__ == "__main__":
+    # Test text in Indonesian
+    test_text = "Baik, saya mendengarkan"
+    out_file = "tts-audio/confirmation.wav"
+    
+    # You can tweak these parameters to make the voice sound more natural
+    # length_scale: Adjusts speaking speed (lower is faster, e.g., 0.8 for faster, 1.2 for slower) try 0.85-0.95
+    # noise_scale: Adjusts voice variability/emotion (default 0.667, try 0.5 to 0.8) try >=0.8
+    # noise_w: Adjusts phoneme length variability (default 0.8, try 0.6 to 1.0) try 0.9
+    synthesize_indonesian(test_text, out_file, length_scale=0.9, noise_scale=0.8, noise_w=0.9)

@@ -2,6 +2,8 @@
 ProTel Live STT - Wake Word Mode (Fixed & Optimized)
 =====================================================
 """
+import threading
+import pygame
 
 import os
 import sys
@@ -104,6 +106,14 @@ def _print_banner(model_size: str) -> None:
     print(f"  Output Dir  : {OUTPUT_DIR}/")
     print("=" * 60)
 
+def _play_confirmation(wav_path: str) -> None:
+    """Play a WAV file in a non-blocking background thread via pygame."""
+    def _play():
+        pygame.mixer.init()
+        pygame.mixer.music.load(wav_path)
+        pygame.mixer.music.play()
+    threading.Thread(target=_play, daemon=True).start()
+
 def main() -> None:
     _print_banner(MODEL_SIZE)
 
@@ -124,6 +134,17 @@ def main() -> None:
     print(f"✅ Wake word model ready.  Trigger → \"{WAKE_WORD_LABEL}\"")
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    #Feedback Confirmation after wake up word is triggered
+    CONFIRMATION_TEXT = "Baik, saya mendengarkan."
+    CONFIRMATION_WAV  = "tts-audio/confirmation.wav"
+
+    os.makedirs("tts-audio", exist_ok=True)
+    if not os.path.exists(CONFIRMATION_WAV):
+        print("⏳ Pre-synthesizing confirmation audio...")
+        from tts_piper import synthesize_indonesian
+        synthesize_indonesian(CONFIRMATION_TEXT, CONFIRMATION_WAV, length_scale=0.9, noise_scale=0.8, noise_w=0.9)
+        print("✅ Confirmation audio ready.")
 
     state            = State.IDLE
     session_id       = 0
@@ -152,6 +173,7 @@ def main() -> None:
 
                 # ══════════════ STATE: IDLE ═══════════════════════
                 if state == State.IDLE:
+                    _play_confirmation(CONFIRMATION_WAV)
                     chunk_i16  = _float32_to_int16(mono)
                     predictions = oww_model.predict(chunk_i16)
 
