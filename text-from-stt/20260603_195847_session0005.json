@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-06-03T19:58:47.682047",
+  "session_id": 5,
+  "wake_word": "hey jarvis",
+  "wake_word_confidence": 0.9651,
+  "transcription": "Berikan saya informasi mengenai pasien Bapak Kevin yang masuk ke rumah sakit ini hari ini pagi tadi, jam 9 pagi. Cari tahu apakah dia punya penyakit bawaan sebelumnya jika dia mempunyai penyakit bawaan, bawaan, tolong bawa dia untuk medical check-up dan check-up secara keseluruhan. Beri tahu suster atau dokter lainnya mengenai kondisi Bapak Kevin tersebut agar tidak salah dosis pada obat dan mengakibatkan kejadian yang tidak diinginkan. Terima kasih.",
+  "language": "id",
+  "stt_model": "small",
+  "duration_seconds": 57.36
+}

@@ -3,3 +3,8 @@ help.txt
 stt-audio/
 check_venv.py
 .antigravity/
+training_data/
+__pycache__/
+ESC-50/
+text-from-stt/
+tts-audio/

@@ -48,9 +48,9 @@ SAMPLE_RATE = 16000
 CHANNELS    = 1       
 OWW_CHUNK_SIZE = 1280
 
-# TURUNKAN THRESHOLD agar deteksi suara manusiamu bisa mereset timer
-SILENCE_THRESHOLD = 0.01    
-SILENCE_TIMEOUT   = 3.5
+
+SILENCE_THRESHOLD = 0.002  #nilai suara yang diterima untuk reset silence timer, semakin kecil semakin sensitif
+SILENCE_TIMEOUT   = 3.5 #waktu timeout tidak ada suara hingga recording stop
 
 OUTPUT_DIR = "text-from-stt"   
 # ═════════════════════════════════════════════════════════════════

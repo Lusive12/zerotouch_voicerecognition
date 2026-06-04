@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-06-03T19:54:56.587220",
+  "session_id": 4,
+  "wake_word": "hey jarvis",
+  "wake_word_confidence": 0.991,
+  "transcription": "Tolong buka rekam medis Bapak Budi yang diterima pada pagi ini masuk UGD di jam 10.30. Buka rekaman medisnya, siapkan untuk ronson hasil kaki kanannya yang terkena kecelakaan motor tersebut. Beritahu juga suster mengenai kondisi pasien tersebut.",
+  "language": "id",
+  "stt_model": "small",
+  "duration_seconds": 37.03
+}

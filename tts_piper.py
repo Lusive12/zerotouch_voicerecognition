@@ -1,5 +1,20 @@
 import os
+import sys
 import subprocess
+import re
+
+# Fix Windows terminal encoding for emojis
+os.environ["PYTHONIOENCODING"] = "utf-8"
+if sys.stdout.encoding != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+
+from medical_dict import MEDICAL_PHONETIC_DICT
+
+def normalize_english_to_indo(text: str) -> str:
+    """Menerjemahkan ejaan Inggris ke cara baca Indonesia berdasarkan kamus fonetik medis"""
+    for eng_word, indo_phonetic in MEDICAL_PHONETIC_DICT.items():
+        text = re.sub(eng_word, indo_phonetic, text, flags=re.IGNORECASE)
+    return text
 
 def synthesize_indonesian(text: str, output_path: str, length_scale: float = 1.0, noise_scale: float = 0.667, noise_w: float = 0.8):
     """
@@ -16,7 +31,11 @@ def synthesize_indonesian(text: str, output_path: str, length_scale: float = 1.0
     if not os.path.exists(piper_exe):
         raise FileNotFoundError(f"Piper executable not found at: {piper_exe}")
 
-    print(f"Synthesizing: \"{text}\"")
+    # Normalisasi teks Inggris ke pelafalan Indonesia
+    phonetic_text = normalize_english_to_indo(text)
+
+    print(f"Original Text: \"{text}\"")
+    print(f"Synthesizing (Phonetic): \"{phonetic_text}\"")
 
     # Run piper via subprocess with advanced parameters for better naturalness
     # We pipe the text to standard input of the piper executable
@@ -30,7 +49,7 @@ def synthesize_indonesian(text: str, output_path: str, length_scale: float = 1.0
                 "--noise_scale", str(noise_scale),
                 "--noise_w", str(noise_w)
             ],
-            input=text.encode("utf-8"),
+            input=phonetic_text.encode("utf-8"),
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
@@ -41,10 +60,10 @@ def synthesize_indonesian(text: str, output_path: str, length_scale: float = 1.0
         print(e.stderr.decode("utf-8"))
 
 if __name__ == "__main__":
-    # Test text in Indonesian
-    test_text = "Baik, saya mendengarkan"
-    out_file = "tts-audio/confirmation.wav"
-    
+    # Test text in Indonesian mixed with English
+    test_text = "Hello, Zero Touch"
+    out_file = "tts-audio/hello_zerotouch2.wav"
+
     # You can tweak these parameters to make the voice sound more natural
     # length_scale: Adjusts speaking speed (lower is faster, e.g., 0.8 for faster, 1.2 for slower) try 0.85-0.95
     # noise_scale: Adjusts voice variability/emotion (default 0.667, try 0.5 to 0.8) try >=0.8

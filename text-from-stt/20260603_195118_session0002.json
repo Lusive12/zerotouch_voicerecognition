@@ -1,0 +1,10 @@
+{
+  "timestamp": "2026-06-03T19:51:18.173425",
+  "session_id": 2,
+  "wake_word": "hey jarvis",
+  "wake_word_confidence": 0.9734,
+  "transcription": "Baik saya mendengarkan. Apa yang sedang kamu lakukan? Tolong buka data pasien yang masuk ke rumah sakit ini pagi tadi. Pukul 9.30. Kalau tidak salah, namanya adalah Pak Budi.",
+  "language": "id",
+  "stt_model": "small",
+  "duration_seconds": 24.06
+}
