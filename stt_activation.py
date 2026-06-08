@@ -39,10 +39,12 @@ COMPUTE_TYPE  = "int8"
 CPU_THREADS   = 16            
 LANGUAGE      = "id"          
 
-WAKE_WORD_MODEL     = "hey_jarvis"
-WAKE_WORD_LABEL     = "hey jarvis"
-# NAIKKAN THRESHOLD agar tidak sering bocor oleh noise ruangan
-WAKE_WORD_THRESHOLD = 0.9             
+# Path to the custom-trained ONNX model (produced by train_wakeword.py)
+WAKE_WORD_MODEL     = "models/hello_zerotouch.onnx"
+WAKE_WORD_LABEL     = "hello zero touch"
+# Lower threshold is fine for a custom model trained on the exact phrase;
+# tune between 0.5–0.7 after live testing to balance sensitivity vs. false positives.
+WAKE_WORD_THRESHOLD = 0.5             
 
 SAMPLE_RATE = 16000   
 CHANNELS    = 1       
