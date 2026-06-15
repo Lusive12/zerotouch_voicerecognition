@@ -12,6 +12,9 @@ models/hello_zerotouch/
 training_data/resampled_16k/
 training_data_v2/
 
+#Logs
+scripts/training/logs/
+
 *.npy
 *.pt
 
