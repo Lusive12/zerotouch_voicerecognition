@@ -40,18 +40,19 @@ CPU_THREADS   = 16
 LANGUAGE      = "id"          
 
 # Path to the custom-trained ONNX model (produced by train_wakeword.py)
-WAKE_WORD_MODEL     = "models/hello_zerotouch.onnx"
+WAKE_WORD_MODEL     = "models/hello_zerotouch_v2.onnx"
 WAKE_WORD_LABEL     = "hello zero touch"
 # Lower threshold is fine for a custom model trained on the exact phrase;
 # tune between 0.5–0.7 after live testing to balance sensitivity vs. false positives.
-WAKE_WORD_THRESHOLD = 0.5             
+#after the v2 model, if the user said the custom wake word it directly, the confidence level will be near 1 (>=0.9)
+WAKE_WORD_THRESHOLD = 0.85
 
 SAMPLE_RATE = 16000   
 CHANNELS    = 1       
 OWW_CHUNK_SIZE = 1280
 
 
-SILENCE_THRESHOLD = 0.002  #nilai suara yang diterima untuk reset silence timer, semakin kecil semakin sensitif
+SILENCE_THRESHOLD = 0.03  #nilai suara yang diterima untuk reset silence timer, semakin kecil semakin sensitif
 SILENCE_TIMEOUT   = 3.5 #waktu timeout tidak ada suara hingga recording stop
 
 OUTPUT_DIR = "text-from-stt"   
@@ -155,6 +156,11 @@ def main() -> None:
     last_speech_time = 0.0
     detected_conf    = 0.0
     session_max_rms  = 0.0
+    
+    # ── Mencegah False Positive dari ucapan pendek (misal: "hello" saja) ──
+    trigger_count    = 0
+    REQUIRED_TRIGGERS = 5  # Butuh 5 frame (sekitar 400ms) berturut-turut dengan confidence tinggi
+    #REQUIRED_TRIGGERS= 5 frame adalah waktu yang diperlukan untuk berbicara "hello zero touch" secara penuh
 
     stream = sd.InputStream(
         samplerate=SAMPLE_RATE,
@@ -175,27 +181,34 @@ def main() -> None:
 
                 # ══════════════ STATE: IDLE ═══════════════════════
                 if state == State.IDLE:
-                    _play_confirmation(CONFIRMATION_WAV)
                     chunk_i16  = _float32_to_int16(mono)
                     predictions = oww_model.predict(chunk_i16)
 
                     for ww_name, score in predictions.items():
                         if score >= WAKE_WORD_THRESHOLD:
-                            detected_conf    = float(score)
-                            session_id      += 1
-                            state            = State.LISTENING
-                            session_buffer   = [mono.copy()]
-                            session_start    = time.time()
-                            last_speech_time = time.time()
-                            session_max_rms  = _rms(mono)
+                            trigger_count += 1
+                            if trigger_count >= REQUIRED_TRIGGERS:
+                                _play_confirmation(CONFIRMATION_WAV)
+                                detected_conf    = float(score)
+                                session_id      += 1
+                                state            = State.LISTENING
+                                session_buffer   = [mono.copy()]
+                                session_start    = time.time()
+                                last_speech_time = time.time()
+                                session_max_rms  = _rms(mono)
 
-                            print(
-                                f"\n[DETECTED] Wake word terdeteksi!  "
-                                f"(\"{WAKE_WORD_LABEL}\"  confidence: {detected_conf:.2f})"
-                            )
-                            print("[LISTENING] Silakan berbicara...")
-                            print("-" * 60)
-                            break
+                                print(
+                                    f"\n[DETECTED] Wake word terdeteksi!  "
+                                    f"(\"{WAKE_WORD_LABEL}\"  confidence: {detected_conf:.2f})"
+                                )
+                                
+                                print("[LISTENING] Silakan berbicara...")
+                                print("-" * 60)
+                                trigger_count = 0  # reset setelah berhasil
+                                break
+                        else:
+                            # Jika score turun, kurangi perlahan agar tidak terlalu sensitif pada noise sesaat
+                            trigger_count = max(0, trigger_count - 1)
 
                 # ══════════════ STATE: LISTENING ══════════════════
                 elif state == State.LISTENING:
@@ -214,11 +227,8 @@ def main() -> None:
 
                     bar_filled  = int((silence_dur / SILENCE_TIMEOUT) * 20)
                     bar         = "#" * bar_filled + "." * (20 - bar_filled)
-                    sys.stdout.write(
-                        f"  [REC] Elapsed: {elapsed:4.1f}s  "
-                        f"Silence: [{bar}] {silence_dur:.1f}/{SILENCE_TIMEOUT}s\r"
-                    )
-                    sys.stdout.flush()
+                    msg         = f"[REC] {elapsed:4.1f}s | Silence: [{bar}] {silence_dur:.1f}/{SILENCE_TIMEOUT}s"
+                    print(f"\r{msg.ljust(60)}", end="", flush=True)
 
                     # ── Silence timeout → transcribe & save ───────
                     if silence_dur >= SILENCE_TIMEOUT:

@@ -8,7 +8,7 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 if sys.stdout.encoding != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
-from medical_dict import MEDICAL_PHONETIC_DICT
+from scripts.utils.medical_dict import MEDICAL_PHONETIC_DICT
 
 def normalize_english_to_indo(text: str) -> str:
     """Menerjemahkan ejaan Inggris ke cara baca Indonesia berdasarkan kamus fonetik medis"""
